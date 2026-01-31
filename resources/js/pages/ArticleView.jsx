@@ -3,6 +3,15 @@ import { useParams, Link } from 'react-router-dom';
 
 const API_BASE = '/api';
 
+function Avatar({ name }) {
+    const initial = name ? name.charAt(0).toUpperCase() : '?';
+    return (
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-semibold text-sm">
+            {initial}
+        </div>
+    );
+}
+
 export default function ArticleView() {
     const { id } = useParams();
     const [article, setArticle] = useState(null);
@@ -53,76 +62,130 @@ export default function ArticleView() {
             year: 'numeric',
         });
 
-    if (loading) return <p className="text-[#706f6c]">Загрузка...</p>;
-    if (error) return <p className="text-red-600">Ошибка: {error}</p>;
+    if (loading) {
+        return (
+            <div className="space-y-6 animate-pulse">
+                <div className="h-5 w-24 bg-stone-200 rounded" />
+                <div className="h-9 w-3/4 bg-stone-200 rounded" />
+                <div className="h-4 w-32 bg-stone-100 rounded" />
+                <div className="space-y-3 h-4 bg-stone-100 rounded" />
+                <div className="h-4 w-full bg-stone-100 rounded" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+                <p className="text-red-700 font-medium">Статья не найдена</p>
+                <p className="text-sm text-red-600 mt-1">{error}</p>
+                <Link to="/" className="mt-4 inline-block text-sm font-medium text-teal-600 hover:text-teal-700">
+                    ← Вернуться к списку
+                </Link>
+            </div>
+        );
+    }
+
     if (!article) return null;
+
+    const comments = article.comments || [];
 
     return (
         <article>
-            <Link to="/" className="text-sm text-[#706f6c] hover:underline mb-4 inline-block">
-                ← Назад к списку
+            <Link
+                to="/"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-teal-600 mb-6"
+            >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Назад к списку
             </Link>
-            <h1 className="text-2xl font-semibold mb-2">{article.title}</h1>
-            <p className="text-sm text-[#706f6c] dark:text-[#A1A09A] mb-6">
-                {formatDate(article.created_at)}
-            </p>
-            <div className="prose dark:prose-invert max-w-none mb-8 whitespace-pre-wrap">
+
+            <header className="mb-8">
+                <time className="text-xs font-medium text-teal-600 uppercase tracking-wide">
+                    {formatDate(article.created_at)}
+                </time>
+                <h1 className="mt-2 text-3xl font-semibold text-stone-900 leading-tight" style={{ fontFamily: 'var(--font-serif)' }}>
+                    {article.title}
+                </h1>
+            </header>
+
+            <div className="text-stone-700 leading-relaxed whitespace-pre-wrap text-[15px]">
                 {article.content}
             </div>
 
-            <section className="border-t border-[#e3e3e0] dark:border-[#3E3E3A] pt-6">
-                <h2 className="text-lg font-medium mb-4">Комментарии</h2>
-                <ul className="space-y-3 mb-6">
-                    {(article.comments || []).map((c) => (
-                        <li
-                            key={c.id}
-                            className="p-3 bg-white dark:bg-[#161615] border border-[#e3e3e0] dark:border-[#3E3E3A] rounded"
-                        >
-                            <p className="font-medium text-sm">{c.author_name}</p>
-                            <p className="text-sm text-[#706f6c] dark:text-[#A1A09A]">
-                                {formatDate(c.created_at)}
-                            </p>
-                            <p className="mt-1">{c.content}</p>
+            <section className="mt-12 pt-8 border-t border-stone-200">
+                <h2 className="text-xl font-semibold text-stone-900 mb-6" style={{ fontFamily: 'var(--font-serif)' }}>
+                    Комментарии
+                    {comments.length > 0 && (
+                        <span className="ml-2 text-sm font-normal text-stone-500">({comments.length})</span>
+                    )}
+                </h2>
+
+                <ul className="space-y-4 mb-8">
+                    {comments.map((c) => (
+                        <li key={c.id} className="flex gap-4 rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
+                            <Avatar name={c.author_name} />
+                            <div className="min-w-0 flex-1">
+                                <p className="font-semibold text-stone-900">{c.author_name}</p>
+                                <p className="text-xs text-stone-500 mt-0.5">{formatDate(c.created_at)}</p>
+                                <p className="mt-2 text-stone-600 text-sm leading-relaxed">{c.content}</p>
+                            </div>
                         </li>
                     ))}
                 </ul>
 
-                <form onSubmit={handleSubmitComment} className="space-y-3 max-w-md">
-                    <div>
-                        <label htmlFor="author_name" className="block text-sm font-medium mb-1">
-                            Ваше имя
-                        </label>
-                        <input
-                            id="author_name"
-                            type="text"
-                            value={authorName}
-                            onChange={(e) => setAuthorName(e.target.value)}
-                            required
-                            className="w-full px-3 py-2 border border-[#e3e3e0] dark:border-[#3E3E3A] rounded bg-white dark:bg-[#161615]"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="content" className="block text-sm font-medium mb-1">
-                            Комментарий
-                        </label>
-                        <textarea
-                            id="content"
-                            value={commentContent}
-                            onChange={(e) => setCommentContent(e.target.value)}
-                            required
-                            rows={3}
-                            className="w-full px-3 py-2 border border-[#e3e3e0] dark:border-[#3E3E3A] rounded bg-white dark:bg-[#161615]"
-                        />
-                    </div>
-                    {submitError && <p className="text-sm text-red-600">{submitError}</p>}
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className="px-4 py-2 bg-[#1b1b18] dark:bg-white text-white dark:text-[#1b1b18] rounded hover:opacity-90 disabled:opacity-50"
-                    >
-                        {submitting ? 'Отправка...' : 'Отправить'}
-                    </button>
-                </form>
+                <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+                    <h3 className="text-sm font-semibold text-stone-900 mb-4">Оставить комментарий</h3>
+                    <form onSubmit={handleSubmitComment} className="space-y-4">
+                        <div>
+                            <label htmlFor="author_name" className="block text-sm font-medium text-stone-700 mb-1.5">
+                                Ваше имя
+                            </label>
+                            <input
+                                id="author_name"
+                                type="text"
+                                value={authorName}
+                                onChange={(e) => setAuthorName(e.target.value)}
+                                required
+                                placeholder="Имя"
+                                className="w-full px-4 py-2.5 rounded-lg border border-stone-300 bg-stone-50 text-stone-900 placeholder-stone-400 focus:bg-white focus:border-teal-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="content" className="block text-sm font-medium text-stone-700 mb-1.5">
+                                Комментарий
+                            </label>
+                            <textarea
+                                id="content"
+                                value={commentContent}
+                                onChange={(e) => setCommentContent(e.target.value)}
+                                required
+                                rows={3}
+                                placeholder="Напишите комментарий..."
+                                className="w-full px-4 py-2.5 rounded-lg border border-stone-300 bg-stone-50 text-stone-900 placeholder-stone-400 focus:bg-white focus:border-teal-500 resize-y min-h-[80px]"
+                            />
+                        </div>
+                        {submitError && (
+                            <p className="text-sm text-red-600">{submitError}</p>
+                        )}
+                        <button
+                            type="submit"
+                            disabled={submitting}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-teal-600 text-white font-medium text-sm hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        >
+                            {submitting ? (
+                                <>
+                                    <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    Отправка...
+                                </>
+                            ) : (
+                                'Отправить'
+                            )}
+                        </button>
+                    </form>
+                </div>
             </section>
         </article>
     );

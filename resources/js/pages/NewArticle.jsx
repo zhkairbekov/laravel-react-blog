@@ -30,46 +30,82 @@ export default function NewArticle() {
 
     return (
         <div>
-            <Link to="/" className="text-sm text-[#706f6c] hover:underline mb-4 inline-block">
-                ← Назад к списку
+            <Link
+                to="/"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-teal-600 mb-6"
+            >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Назад к списку
             </Link>
-            <h1 className="text-2xl font-semibold mb-6">Новая статья</h1>
-            <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
-                <div>
-                    <label htmlFor="title" className="block text-sm font-medium mb-1">
-                        Заголовок
-                    </label>
-                    <input
-                        id="title"
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                        maxLength={255}
-                        className="w-full px-3 py-2 border border-[#e3e3e0] dark:border-[#3E3E3A] rounded bg-white dark:bg-[#161615]"
-                    />
+
+            <h1 className="text-3xl font-semibold text-stone-900 mb-8" style={{ fontFamily: 'var(--font-serif)' }}>
+                Новая статья
+            </h1>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm space-y-6">
+                    <div>
+                        <label htmlFor="title" className="block text-sm font-medium text-stone-700 mb-1.5">
+                            Заголовок
+                        </label>
+                        <input
+                            id="title"
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            required
+                            maxLength={255}
+                            placeholder="Введите заголовок статьи"
+                            className="w-full px-4 py-2.5 rounded-lg border border-stone-300 bg-stone-50 text-stone-900 placeholder-stone-400 focus:bg-white focus:border-teal-500"
+                        />
+                        <p className="mt-1 text-xs text-stone-500">{title.length}/255</p>
+                    </div>
+                    <div>
+                        <label htmlFor="content" className="block text-sm font-medium text-stone-700 mb-1.5">
+                            Содержание
+                        </label>
+                        <textarea
+                            id="content"
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            required
+                            rows={12}
+                            placeholder="Напишите текст статьи..."
+                            className="w-full px-4 py-2.5 rounded-lg border border-stone-300 bg-stone-50 text-stone-900 placeholder-stone-400 focus:bg-white focus:border-teal-500 resize-y min-h-[200px]"
+                        />
+                    </div>
                 </div>
-                <div>
-                    <label htmlFor="content" className="block text-sm font-medium mb-1">
-                        Содержание
-                    </label>
-                    <textarea
-                        id="content"
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        required
-                        rows={10}
-                        className="w-full px-3 py-2 border border-[#e3e3e0] dark:border-[#3E3E3A] rounded bg-white dark:bg-[#161615]"
-                    />
+
+                {error && (
+                    <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {error}
+                    </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        type="submit"
+                        disabled={submitting}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-teal-600 text-white font-medium text-sm hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                    >
+                        {submitting ? (
+                            <>
+                                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                Публикация...
+                            </>
+                        ) : (
+                            'Опубликовать'
+                        )}
+                    </button>
+                    <Link
+                        to="/"
+                        className="text-sm font-medium text-stone-500 hover:text-stone-700"
+                    >
+                        Отмена
+                    </Link>
                 </div>
-                {error && <p className="text-sm text-red-600">{error}</p>}
-                <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-4 py-2 bg-[#1b1b18] dark:bg-white text-white dark:text-[#1b1b18] rounded hover:opacity-90 disabled:opacity-50"
-                >
-                    {submitting ? 'Сохранение...' : 'Опубликовать'}
-                </button>
             </form>
         </div>
     );
